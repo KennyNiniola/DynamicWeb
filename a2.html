@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<!-- css font styling - colour & border of table. -->
+<style>
+</head>  
+<style>
+  .p1 {
+    font-family: "Times New Roman", Times, serif;
+  }
+
+
+  #hygiene_table {
+    font-family: Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  #hygiene_table td,
+  #hygiene_table th {
+    border: 1px solid #808000;
+    padding: 8px;
+  }
+
+  #hygiene_table tr:nth-child() {
+    background-color: #f2f2f2;
+  }
+
+  #hygiene_table tr:hover {
+    background-color: #ddd;
+  }
+
+  #hygiene_table th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #808000;
+    color: mintcream;
+  }
+
+
+</style>
+
+<!-- Heading and paragraph(info) of the web page and the table headers. -->
+
+<body>
+    <!-- Heading and paragrapgh. -->
+  <div class="container">
+    <div class="table-responsive">
+      <h1 style="font-size:40px;">Hygiene Inspections</h1>
+      <p>This page displays the results of the business's name, address, type, the hygiene rating and the date.</p>
+      <br />
+        
+        <!-- Search form and button. -->
+        <div class="ui-widget search">
+        <b for="search">Business name: </b>
+        <input id="search">
+        <input type="button" name="search_item" class="button searchButton" value="Search" id="searchbtn"/>
+    </div>
+    
+     <p>  
+     </p>
+        
+        <!-- Creating the hygiene table. -->
+      <table class="table table-bordered table-striped" id="hygiene_table">
+        <div class="form-group">
+          <div class="input-group">
+          </div>
+        </div>
+        <tr>
+          <th>Name</th>
+          <th>Address</th>
+          <th>Type</th>
+          <th>Rating</th>
+          <th>Date</th>            
+        </tr>
+      </table>
+    
+    </div>
+  </div>
+</body>
+
+
+<!-- script of the table which returns the hygiene data value e.g. name, address etc. and inserts the content at the end of selected elements. -->
+<script>
+  $(document).ready(function () {
+      
+    //returns the name, address, type, rating and date of data results
+    $.getJSON("https://www.cs.kent.ac.uk/people/staff/yh/co539/A2-data/hygiene.php", function (data) {
+      var hygiene_data = '';
+      $.each(data, function (key, value) {
+        hygiene_data += '<tr>';
+        hygiene_data += '<td>' + value.name + '</td>';
+        hygiene_data += '<td>' + value.address + '</td>';
+        hygiene_data += '<td>' + value.type + '</td>';
+        hygiene_data += '<td>' + value.rating + '</td>';
+        hygiene_data += '<td>' + value.date + '</td>';
+        
+        hygiene_data += '</tr>';
+      });
+      $('#hygiene_table').append(hygiene_data);
+    });
+    
+    //returns button number and returns page data on click
+    $.get({
+      url: "https://www.cs.kent.ac.uk/people/staff/yh/co539/A2-data/hygiene.php?op=pages",
+      success: function (data) {
+        var i = data.pages;
+        for (var j = 1; j <= i; j++) {
+          var buttons = $('<button id = "button' + j + '", onclick="getPage(' + j + ')">' + "Page: " + j + "</button>")
+          buttons.appendTo("body")
+        }
+      },
+      dataType: "json"
+    });
+
+//search button function 
+      
+ 
+     
+        
+      
+  });
+
+//get page function to return the pages data which can be then used for the $.get function
+  function getPage(i) {
+   $.getJSON("https://www.cs.kent.ac.uk/people/staff/yh/co539/A2-data/hygiene.php?op=get&page=" + i, function(data){
+    $('#hygiene_table').empty();
+    
+    var hygiene_data = '';
+    $.each(data, function(key, value){
+        hygiene_data += '<tr>';
+        hygiene_data += '<td>' + value.name + '</td>';
+        hygiene_data += '<td>' + value.address + '</td>';
+        hygiene_data += '<td>' + value.type + '</td>';
+        hygiene_data += '<td>' + value.rating + '</td>';
+        hygiene_data += '<td>' + value.date + '</td>';
+        hygiene_data += '</tr>';
+    });
+      $('#hygiene_table').append(hygiene_data); 
+   });
+  }
+
+    //attemped search function(doesn't work)
+    function search() {
+    $( function() {
+    $( "#search" ).autocomplete({
+     source: business
+         });
+          });
+        
+     $('input:button[name = "searchbtn"]').click(function() {
+         var searcha = $('#search').val();
+         $("#errorMessage").empty();
+        
+    $.get( 'https://www.cs.kent.ac.uk/people/staff/yh/co539/A2-data/hygiene.php?op=search&name',
+     {op: 'searchname', name: searcha}).done(function( data ) {
+     if(searcha !== ""){
+     if ($.parseJSON(data).length === 0) {
+     $("#errorMessage").append('Results not found "'+searcha+'".');
+          } else {
+             $("#hygiene_table").empty();
+            getPage(data);
+                               
+      $.each($.parseJSON(data), function (i, obj) {
+        if(!business.toString().includes(obj.business)){business.push(obj.business);}
+                                });
+                            }
+         }else {
+        $( "#errorMessage" ).append('Please enter a search value!');
+         }
+         });
+         });
+         }
+
+</script>
+
+    
+
+</head>
+
+
+
+
+
